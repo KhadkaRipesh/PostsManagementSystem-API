@@ -3,6 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { FileSizeValidationPipe } from './pipes/file-size-validation.pipe';
 
 @Injectable()
 export class PostsService {
