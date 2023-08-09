@@ -7,18 +7,22 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { type } from 'os';
 import { PostsService } from './posts.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { FileSizeValidationPipe } from './pipes/file-size-validation.pipe';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
   @Get()
   getPosts(@Query('title') title: 'Title 1' | 'Title 2' | 'Title 3') {
-    return this.postsService.getPosts(title);
+    return this.postsService.getPosts();
   }
 
   @Get(':id')
@@ -39,5 +43,32 @@ export class PostsController {
   @Delete(':id')
   deletePost(@Param('id') id: string) {
     return this.postsService.deletePost(+id);
+  }
+
+  @Post('/upload')
+  @UseInterceptors(
+    FileInterceptor('file1', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          cb(null, `${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async uploadFile(
+    @UploadedFile(new FileSizeValidationPipe()) file: Express.Multer.File,
+  ) {
+    return 'Succcess';
+  }
+
+  @Post(':name/:second')
+  addCornJob(@Param('name') name: string, @Param('second') second: string) {
+    return this.postsService.addCronJob(name, second);
+  }
+
+  @Post(':name')
+  deleteCornJob(@Param('name') name: string) {
+    return this.postsService.deleteCron(name);
   }
 }
